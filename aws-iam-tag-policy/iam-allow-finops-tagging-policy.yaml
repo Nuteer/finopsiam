@@ -1,0 +1,183 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Creates A Policy that allows a Cost Allocation tag to be added or changed on any AWS resource via the Resource Manager Tag Editor
+Parameters:
+  CostAllocationTagKey:
+    Type: String
+    Description: 'The Cost Allocation Tag Key that is allowed to be  modified. Can be wildcarded'
+    Default: 'Cost*'
+    MinLength: '1'
+    MaxLength: '127'
+Resources:
+  TaggingPolicy:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      ManagedPolicyName: !Sub '${AWS::StackName}-CostAllocationTagManagementPolicy'
+      Description: !Sub 'Policy allowing modification of the Cost Allocation Tag on any resource'
+      Path: /
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        Statement:
+          - Sid: AllowResourceCostAllocationTags
+            Effect: Allow
+            Resource: '*'
+            Condition:
+              ForAllValues:StringLike:
+                'AWS:TagKeys': 
+                  - !Ref CostAllocationTagKey
+            Action:
+              - access-analyzer:TagResource
+              - acm-pca:TagCertificateAuthority
+              - acm:AddTagsToCertificate
+              - amplify:TagResource
+              - appconfig:TagResource
+              - appflow:TagResource
+              - appmesh:TagResource
+              - appstream:TagResource
+              - appsync:TagResource
+              - athena:TagResource
+              - autoscaling:CreateOrUpdateTags
+              - backup:TagResource
+              - cassandra:TagResource
+              - chime:TagResource
+              - cloud9:TagResource
+              - cloudfront:TagResource
+              - cloudhsm:TagResource
+              - cloudwatch:TagResource
+              - codecommit:TagResource
+              - codedeploy:TagResource
+              - codepipeline:TagResource
+              - codestar-connections:TagResource
+              - codestar-notifications:TagResource
+              - cognito-identity:TagResource
+              - cognito-idp:TagResource
+              - comprehend:TagResource
+              - config:TagResource
+              - connect:TagResource
+              - dataexchange:TagResource
+              - datasync:TagResource
+              - devicefarm:TagResource
+              - directconnect:TagResource
+              - dms:AddTagsToResource
+              - ds:AddTagsToResource
+              - ec2:CreateTags
+              - ecr:TagResource
+              - ecs:TagResource
+              - eks:TagResource
+              - elasticbeanstalk:AddTags
+              - elasticmapreduce:AddTags
+              - events:TagResource
+              - firehose:TagDeliveryStream
+              - fms:TagResource
+              - fsx:TagResource
+              - gamelift:TagResource
+              - globalaccelerator:TagResource
+              - glue:TagResource
+              - greengrass:TagResource
+              - groundstation:TagResource
+              - guardduty:TagResource
+              - imagebuilder:TagResource
+              - iot1click:TagResource
+              - iot:TagResource
+              - iotanalytics:TagResource
+              - iotevents:TagResource
+              - iotsitewise:TagResource
+              - iotthingsgraph:TagResource
+              - kafka:TagResource
+              - kendra:TagResource
+              - kinesisanalytics:TagResource
+              - kinesisvideo:TagResource
+              - lex:TagResource
+              - license-manager:TagResource
+              - lightsail:TagResource
+              - macie2:TagResource
+              - mediaconvert:TagResource
+              - medialive:CreateTags
+              - mediapackage:TagResource
+              - mediatailor:TagResource
+              - mobiletargeting:TagResource
+              - mq:CreateTags
+              - networkmanager:TagResource
+              - qldb:TagResource
+              - quicksight:TagResource
+              - ram:TagResource
+              - rds:AddTagsToResource
+              - rds:RemoveTagsFromResource
+              - resource-groups:Tag
+              - robomaker:TagResource
+              - sagemaker:AddTags
+              - savingsplans:TagResource
+              - schemas:TagResource
+              - secretsmanager:TagResource
+              - servicediscovery:TagResource
+              - signer:TagResource
+              - sns:TagResource
+              - states:TagResource
+              - storagegateway:AddTagsToResource
+              - storagegateway:RemoveTagsFromResource
+              - swf:TagResource
+              - transfer:TagResource
+              - waf-regional:TagResource
+              - waf:TagResource
+              - wafv2:TagResource
+              - worklink:TagResource
+          - Sid: AllowAnyResourceTags
+            # These services do not allow the AWS:TagKeys Condition, so unfortunately the policy receives full access to manage any tag
+            Effect: Allow
+            Resource: '*'
+            Action:
+              - a4b:TagResource
+              - clouddirectory:TagResource
+              - cloudformation:TagResource
+              - cloudsearch:AddTags
+              - cloudtrail:AddTags
+              - datapipeline:AddTags
+              - dax:TagResource
+              - discovery:CreateTags
+              - dlm:TagResource
+              - dynamodb:TagResource
+              - elasticache:AddTagsToResource
+              - elasticfilesystem:TagResource
+              - elasticloadbalancing:TagResource
+              - es:AddTags
+              - glacier:AddTagsToVault
+              - greengrass:TagResource
+              - groundstation:TagResource
+              - guardduty:TagResource
+              - iam:TagRole
+              - iam:TagUser
+              - kinesis:AddTagsToStream
+              - kms:TagResource
+              - lambda:TagResource
+              - machinelearning:AddTags
+              - mediastore:TagResource
+              - opsworks:TagResource
+              - organizations:TagResource
+              - redshift:CreateTags
+              - route53:ChangeTagsForResource
+              - route53domains:UpdateTagsForDomain
+              - route53resolver:TagResource
+              - s3:PutBucketTagging
+              - securityhub:TagResource
+              - sqs:TagQueue
+              - ssm:AddTagsToResource
+              - synthetics:TagResource
+              - workmail:TagResource
+              - workspaces:CreateTags
+          - Sid: ResourceTagEditorFullAccess
+            Effect: Allow
+            Action:
+              - 'tag:GetResources'
+              - 'tag:TagResources'
+              - 'tag:UntagResources'
+              - 'tag:GetTagKeys'
+              - 'tag:GetTagValues'
+            Resource: '*'
+          
+Outputs:
+  TaggingPolicy:
+    Description: IAM Managed Tagging Policy Arn
+    Value: !Ref TaggingPolicy
+    Export:
+      Name: !Sub '${AWS::StackName}-TaggingPolicy'
